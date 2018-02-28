@@ -1,0 +1,28 @@
+{
+    "name": "diskerror/gitenberg_dl",
+    "description": "Download GITenberg books into MongoDB for later analysis.",
+    "type": "project",
+    "require": {
+        "diskerror/typed": ">=0.4.3",
+        "diskerror/utilities": ">=0.3.0",
+        "mongodb/mongodb": "^1.3",
+        "zendframework/zend-json": "^3.1",
+        "zendframework/zend-xml2json": "^3.1",
+        "phalcon/devtools": "^3.2",
+        "ext-phalcon": "^3.3"
+    },
+    "require-dev": {
+        "diskerror/typed": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "Reid Woodbury",
+            "email": "reidw@rawsound.com"
+        }
+    ],
+    "config": {
+        "platform": {
+            "ext-mongo": "1.6.16"
+        }
+    }
+}
