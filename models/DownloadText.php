@@ -22,6 +22,8 @@ class DownloadText
 	 */
 	protected $_available_encodings;
 
+	protected $_cleaner;
+
 	/**
 	 * DownloadIndex constructor.
 	 *
@@ -60,6 +62,8 @@ class DownloadText
 			'text/plain, text/html; charset="us-ascii"',
 			'',
 		]);
+
+		$this->_cleaner = new RemovePgText();
 	}
 
 	public function Git()
@@ -132,6 +136,7 @@ class DownloadText
 			$text = mb_convert_encoding($text, 'UTF-8', $enc);
 			$text = trim($text, "\x00..\x20") . "\n";
 			$text = preg_replace('/\n\n\n+/', "\n\n", $text);
+			$text = $this->_cleaner->exec($text);
 
 			$this->_connection->query('UPDATE books SET `text` = "' . addslashes($text) . '" WHERE id = ' . $record['id']);
 		}
@@ -256,12 +261,9 @@ class DownloadText
 			}
 
 			$text = strtr($text, ["\r\n" => "\n"]);
-
+			$text = preg_replace('/\\n\\n\\n+/', "\n\n", $text);
 			$text = trim($text, "\x00..\x20") . "\n";
-			$text = preg_replace('/\n\n\n+/', "\n\n", $text);
-//			if (substr($text, 0, 5) === 'GIF87') {
-//				continue;
-//			}
+			$text = $this->_cleaner->exec($text);
 
 			$this->_connection->query('UPDATE books SET `text` = "' . addslashes($text) . '" WHERE id = ' . $record['id']);
 		}

@@ -19,8 +19,8 @@ class MysqlStorage extends Phalcon\Db\Adapter\Pdo\Mysql
 
 		if ($orig === false) {
 			$this->query('
-insert into books
-set meta = "' . addslashes(Json::encode($newBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
+				insert into books
+				set meta = "' . addslashes(Json::encode($newBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
 			');
 			return;
 		}
@@ -54,9 +54,9 @@ set meta = "' . addslashes(Json::encode($newBook->getSpecialObj(['dateToBsonDate
 		}
 
 		$this->query('
-update books
-set meta = "' . addslashes(Json::encode($origBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
-where id  = ' . $origBook->id
+			update books
+			set meta = "' . addslashes(Json::encode($origBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
+			where id  = ' . $origBook->id
 		);
 	}
 
