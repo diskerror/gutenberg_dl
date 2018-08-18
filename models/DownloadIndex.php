@@ -64,7 +64,6 @@ class DownloadIndex
 		foreach ($data as &$v) {
 			array_shift($v);
 			if ($countKeys !== count($v)) {
-				cerr("\nbad line");
 				continue;
 			}
 

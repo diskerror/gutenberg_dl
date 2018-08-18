@@ -29,30 +29,30 @@ class CleanText extends RemovePgText
 	public function CleanAll()
 	{
 		cout("Cleaning all text\nRetrieving IDs ");
-		$records = $this->_connection->fetchAll('
-			SELECT id
-			FROM books
-			WHERE character_length(`text`) > 3000
-			ORDER BY id
-		');
+//		$records = $this->_connection->fetchAll('
+//			SELECT id
+//			FROM pg
+//			WHERE character_length(`text`) > 3000
+//			ORDER BY id
+//		');
 
-		cout("\n");
-		foreach ($records as $record) {
-			cout(sprintf("\r%d ", $record['id']));
+//		cout("\n");
+//		foreach ($records as $record) {
+//			cout(sprintf("\r%d ", $record['id']));
 
 			$text = $this->_connection->fetchColumn('
 				SELECT `text`
-				FROM books
-				WHERE id = ' . $record['id']
+				FROM pg
+				WHERE id = 673' // . $record['id']
 			);
 
 			$text = $this->exec($text);
-
-			$this->_connection->query('
-				UPDATE books
-				SET `text` = "' . addslashes($text) . '"
-				WHERE id = ' . $record['id']
-			);
-		}
+cout($text);
+//			$this->_connection->query('
+//				UPDATE pg
+//				SET `text` = "' . addslashes($text) . '"
+//				WHERE id = ' . $record['id']
+//			);
+//		}
 	}
 }

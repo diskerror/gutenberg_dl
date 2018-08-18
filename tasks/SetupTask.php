@@ -10,10 +10,10 @@ class SetupTask extends \Phalcon\Cli\Task
 {
 	public function mysqlAction()
 	{
-//		$this->mysql->query('DROP `books` IF EXISTS');
+		$this->mysql->query('DROP `pg` IF EXISTS');
 
 		$this->mysql->query('
-CREATE TABLE `books` (
+CREATE TABLE `pg` (
   `id` BIGINT(20) UNSIGNED GENERATED ALWAYS AS (json_extract(`meta`,\'$.id\')) STORED NOT NULL,
   `meta` JSON NOT NULL,
   `author` VARCHAR(2048) GENERATED ALWAYS AS (json_extract(`meta`,\'$.author\')) STORED,
@@ -30,6 +30,6 @@ CREATE TABLE `books` (
 
 	public function addIndexAction()
 	{
-		$this->mysql->query('ALTER TABLE `books` ADD FULLTEXT KEY `text` (`text`)');
+		$this->mysql->query('ALTER TABLE `pg` ADD FULLTEXT KEY `text` (`text`)');
 	}
 }

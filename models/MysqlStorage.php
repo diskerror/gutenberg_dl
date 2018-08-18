@@ -7,6 +7,7 @@
  */
 
 use Zend\Json\Json;
+use Diskerror\Typed\ArrayOptions;
 
 class MysqlStorage extends Phalcon\Db\Adapter\Pdo\Mysql
 {
@@ -15,19 +16,21 @@ class MysqlStorage extends Phalcon\Db\Adapter\Pdo\Mysql
 	 */
 	public function mergeUpdate(Book $newBook)
 	{
-		$orig = $this->fetchOne('select meta from books where id = ' . $newBook->id);
+		$orig = $this->fetchOne('SELECT meta FROM pg WHERE id = ' . $newBook->id);
 
 		if ($orig === false) {
+			$newBook->setArrayOptions(ArrayOptions::OMIT_EMPTY);
 			$this->query('
-				insert into books
-				set meta = "' . addslashes(Json::encode($newBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
+				INSERT INTO pg
+				SET meta = "' . addslashes(Json::encode($newBook->toArray())) . '"
 			');
 			return;
 		}
 
 		$origBook = new Book(json_decode($orig['meta']));
 
-		$newBookSO = $newBook->getSpecialObj();
+		$newBook->setArrayOptions(ArrayOptions::OMIT_EMPTY);
+		$newBookSO = $newBook->toArray();
 
 		foreach ($newBookSO as $k => &$v) {
 			switch ($k) {
@@ -54,9 +57,9 @@ class MysqlStorage extends Phalcon\Db\Adapter\Pdo\Mysql
 		}
 
 		$this->query('
-			update books
-			set meta = "' . addslashes(Json::encode($origBook->getSpecialObj(['dateToBsonDate' => false]))) . '"
-			where id  = ' . $origBook->id
+			UPDATE pg
+			SET meta = "' . addslashes(Json::encode($origBook->toArray())) . '"
+			WHERE id  = ' . $origBook->id
 		);
 	}
 

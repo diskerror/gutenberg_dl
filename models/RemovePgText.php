@@ -5,6 +5,10 @@
  * Date: 2018-03-08
  */
 
+use Diskerror\Pcre2\Replacer;
+use Diskerror\Pcre2\Flags\Compile;
+use Diskerror\Pcre2\Flags\Replace;
+
 /**
  * Class CleanText
  */
@@ -41,7 +45,7 @@ class RemovePgText
 			' -->',
 			' *** START OF THIS PROJECT GUTENBERG',
 			'["Small Print" V.',
-			'[Project Gutenberg has reassembled the file', //
+			'[Project Gutenberg has reassembled the file',
 			'[Updater\'s note',
 			'*** START OF THE COPYRIGHTED',
 			'*** START OF THE PROJECT GUTENBERG',
@@ -135,22 +139,68 @@ class RemovePgText
 		array_walk($startMarks, 'RemovePgText::_pregQuote');
 		array_walk($endMarks, 'RemovePgText::_pregQuote');
 
-		$this->_regexStartOnly = '/.+(?:\\n' . implode('|\\n', $startOnly) . ')[^\\n]*[\\n ]*\\n+(.+?)/us';
-		$this->_regexStart = '/.+(?:\\n' . implode('|\\n', $startMarks) . ')[^\\n]*\\n\\n?[\\n ]*\\n+(.+?)/us';
-		$this->_regexEnd = '/(.+?)\s*?(?:\\n' . implode('|\\n', $endMarks) . ').+/us';
+//		$this->_regexStartOnly = '/.+(?:\\n' . implode('|\\n', $startOnly) . ')[^\\n]*[\\n ]*\\n+(.+?)/us';
+//		$this->_regexStart = '/.+(?:\\n' . implode('|\\n', $startMarks) . ')[^\\n]*\\n\\n?[\\n ]*\\n+(.+?)/us';
+//		$this->_regexEnd = '/(.+?)\s*?(?:\\n' . implode('|\\n', $endMarks) . ').+/us';
+
+		$this->_regexStartOnly = new Replacer(
+			'.+(?:\\n' . implode('|\\n', $startOnly) . ')[^\\n]*[\\n ]*\\n+',
+			'',
+			Compile::UTF|Compile::DOTALL|Compile::JIT,
+			Replace::NOTEMPTY
+		);
+		$this->_regexStart = new Replacer(
+			'.+(?:\\n' . implode('|\\n', $startMarks) . ')[^\\n]*\\n\\n?[\\n ]*\\n+',
+			'',
+			Compile::UTF|Compile::DOTALL|Compile::JIT,
+			Replace::NOTEMPTY
+		);
+		$this->_regexEnd = new Replacer(
+			'\s*?(?:\\n' . implode('|\\n', $endMarks) . ').+',
+			'',
+			Compile::UTF|Compile::DOTALL|Compile::JIT,
+			Replace::NOTEMPTY
+		);
 	}
 
 	protected static function _pregQuote(&$in)
 	{
-		$in = preg_quote($in, '/');
+//		$in = preg_quote($in, '/');
+		$in = preg_quote($in);
 	}
+
+//	public function exec($text)
+//	{
+//		$split = strlen($text);
+//		$split = ($split > 14000) ? 14000 : $split;
+//
+//		$text2 = preg_replace($this->_regexStartOnly, '$1', substr($text, 0, $split)) . substr($text, $split);
+//		if ($text2 !== $text) {
+//			return $text2;
+//		}
+//
+//		$split = (int)(strlen($text) * 0.4);
+//		$split = ($split > 12500) ? 12500 : $split;
+//
+//		$sub = substr($text, 0, $split);
+//		$subNew = preg_replace($this->_regexStart, '$1', $sub);
+//
+//		if ($sub !== $subNew) {
+//			$text = $subNew . substr($text, $split);
+//		}
+//		else {
+//			$text = preg_replace($this->_regexStart, '$1', substr($text, 0, 21000)) . substr($text, 21000);
+//		}
+//
+//		return substr($text, 0, -21000) . preg_replace($this->_regexEnd, '$1', substr($text, -21000)) . "\n";
+//	}
 
 	public function exec($text)
 	{
 		$split = strlen($text);
 		$split = ($split > 14000) ? 14000 : $split;
 
-		$text2 = preg_replace($this->_regexStartOnly, '$1', substr($text, 0, $split)) . substr($text, $split);
+		$text2 = $this->_regexStartOnly->replace(substr($text, 0, $split)) . substr($text, $split);
 		if ($text2 !== $text) {
 			return $text2;
 		}
@@ -159,15 +209,15 @@ class RemovePgText
 		$split = ($split > 12500) ? 12500 : $split;
 
 		$sub = substr($text, 0, $split);
-		$subNew = preg_replace($this->_regexStart, '$1', $sub);
+		$subNew = $this->_regexStart->replace($sub);
 
 		if ($sub !== $subNew) {
 			$text = $subNew . substr($text, $split);
 		}
 		else {
-			$text = preg_replace($this->_regexStart, '$1', substr($text, 0, 21000)) . substr($text, 21000);
+			$text = $this->_regexStart->replace(substr($text, 0, 21000)) . substr($text, 21000);
 		}
 
-		return substr($text, 0, -21000) . preg_replace($this->_regexEnd, '$1', substr($text, -21000)) . "\n";
+		return substr($text, 0, -21000) . $this->_regexEnd->replace(substr($text, -21000)) . "\n";
 	}
 }

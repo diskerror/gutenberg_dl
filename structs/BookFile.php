@@ -26,7 +26,7 @@ class BookFile extends Diskerror\Typed\TypedClass
 			$v = $v['a'];
 		}
 
-		$this->type = self::_castToString($v);
+		$this->type = Diskerror\Typed\Cast::toString($v);
 	}
 
 	/**
@@ -42,7 +42,7 @@ class BookFile extends Diskerror\Typed\TypedClass
 			$v = $v['a'];
 		}
 
-		$this->name = self::_castToString($v);
+		$this->name = Diskerror\Typed\Cast::toString($v);
 	}
 
 }

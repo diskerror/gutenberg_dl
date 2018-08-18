@@ -74,7 +74,7 @@ class DownloadText
 		//	Get list of appropriate IDs with associated file names.
 		$records = $this->_connection->fetchAll('
 			SELECT id, meta->"$.gitb" AS `gitb`
-			FROM books
+			FROM pg
 			WHERE json_contains_path(meta, "one", "$.gitb")
 				AND `text` IS NULL
 				AND (json_extract(meta, "$.language") LIKE "%English%" OR json_extract(meta, "$.language") LIKE "%en%")
@@ -150,8 +150,8 @@ class DownloadText
 
 		//	Get list of appropriate IDs with associated file names.
 		$records = $this->_connection->fetchAll('
-			SELECT id, meta->"$.file" AS `file`
-			FROM books
+			SELECT id, meta
+			FROM pg
 			WHERE json_contains_path(meta, "one", "$.file")
 				AND `text` IS NULL
 				AND (json_extract(meta, "$.language") LIKE "%English%" OR json_extract(meta, "$.language") LIKE "%en%")
@@ -159,7 +159,9 @@ class DownloadText
 		');
 
 		foreach ($records as $record) {
-			$files = new Diskerror\Typed\TypedArray($record['file'], 'BookFile');
+			$record['meta'] = json_decode($record['meta'], true);
+
+			$files = new Diskerror\Typed\TypedArray($record['meta']['file'], 'BookFile');
 
 			//	find the best file type available then save it's name and type
 			$encNum = 100;
@@ -218,7 +220,12 @@ class DownloadText
 					$text = '';
 					foreach ($info as $i) {
 						$tmp = '';
-						switch (strtoupper(substr($i, -4))) {
+						$fileEnding = strtoupper(substr($i, -4));
+						if(in_array('HTML', $record['meta']['note'])){
+							$fileEnding = 'HTM2';
+						}
+
+						switch ($fileEnding) {
 							case '.TXT':
 								$tmp = shell_exec('unzip -p ' . $escapedName . ' ' . escapeshellarg($i)) . "\n\n";
 								$tmp = mb_convert_encoding($tmp, 'UTF-8', $enc);
@@ -236,6 +243,18 @@ class DownloadText
 								libxml_use_internal_errors(true);
 								$dom->loadHtml($tmp);
 								$tmp = $dom->getElementsByTagName('body')[0]->textContent;
+							break;
+
+							case 'HTM2':
+								$tmp = shell_exec('unzip -p ' . $escapedName . ' ' . escapeshellcmd($i));
+								$tmp = mb_convert_encoding($tmp, 'UTF-8', $enc);
+
+								if ($tmp === '') {
+									continue;
+								}
+
+								$tmp = preg_replace('#</?[A-Za-z=0-9]{1,10}>#', '', $tmp);
+								cout($tmp);return;
 							break;
 						}
 
